@@ -21,24 +21,58 @@ from random import shuffle
 BINGO_GRID = 5
 BINGO_START_NUM = 1
 BINGO_END_NUM = BINGO_GRID * BINGO_GRID
+CHECKED_GRID = 1
+UNCHECKED_GRID = 0
 
 
 #Create new game
-def createNewGame():
+def createGrid():
     num_list = list(range(BINGO_START_NUM,BINGO_END_NUM+1))
 
     shuffle(num_list)
-    player_grid = to_matrix(num_list,BINGO_GRID)
-    print(player_grid)
+    grid = to_matrix(num_list,BINGO_GRID)
+    print(grid)
 
-    shuffle(num_list)
-    comp_grid = to_matrix(num_list,BINGO_GRID)
-    print(comp_grid)
+    return grid
 
 #Convert a list to 2d array
 def to_matrix(l, n):
     return [l[i:i+n] for i in range(0, len(l), n)]
 
+
 #MAIN program
-createNewGame()
+called_list = []
+mask_bingo_grid = [[0] * BINGO_GRID for n in range(BINGO_GRID)]
+
+player_grid = createGrid()
+comp_grid = createGrid()
+
+isBingo = True
+
+#Start Game
+while isBingo:
+    num_picked = int(input('Pick a number from 1-25: \n'))
+
+    if num_picked in called_list:
+        print('Number has been called before. Choose another one')
+
+    if num_picked > 25 and num_picked <= 0:
+        print('Invalid entry!')
+    else:
+        #checks where is the number coordinate
+        elem = [elem for elem in player_grid if int(num_picked) in elem][0]
+        print(elem)
+        print('The index is (%d, %d)' %(player_grid.index(elem), elem.index(num_picked)))
+
+        mask_bingo_grid[player_grid.index(elem)][elem.index(num_picked)] = CHECKED_GRID
+        print(mask_bingo_grid)
+        called_list.append(num_picked)
+        print(called_list)
+
+    
+
+
+
+
+
             
