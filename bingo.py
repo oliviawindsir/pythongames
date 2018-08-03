@@ -30,67 +30,106 @@ class Grid:
         self.gridSize = GRID_SIZE
         self.minVal = BINGO_START_NUM
         self.maxVal = BINGO_END_NUM
-        print('Initialized grid properties')
+##        print('Initialized grid properties')
 
     '''Create grid with randomly allocated num within range'''
     def createStatusBoard(self):
         grid = []
         grid = [[0] * GRID_SIZE for n in range(GRID_SIZE)]
-        print('Created status grid of size ' + str(self.gridSize) + 'X' + str(self.gridSize))
+##        print('Created status grid of size ' + str(self.gridSize) + 'X' + str(self.gridSize))
         return grid
 
     def createPlayBoard(self):
         num_list = list(range(self.minVal,self.maxVal+1))
         shuffle(num_list)
         grid = Utilities.to_matrix(num_list,GRID_SIZE)
-        print('Created play grid of size ' + str(self.gridSize) + 'X' + str(self.gridSize))
+####        print('Created play grid of size ' + str(self.gridSize) + 'X' + str(self.gridSize))
         return grid
 
 class Players(Grid):    
     '''Initialize player properties'''
-    def createPlayer(self):
-        self.gridBoard = Grid.createPlayBoard(self)
+    def createPlayer(self, name):
+        self.name = name
+        self.playBoard = Grid.createPlayBoard(self)
         self.statusBoard = Grid.createStatusBoard(self)
-        self.status = []
+        self.countHorizontalMatch = 0
+        self.countVerticalMatch = 0
+        self.countDiagonalMatch = 0
         print('Player initialized with a grid and status board')
         return True
 
+    def getName(self):
+        playerName = str(self.name)
+        return playerName
+
+    def displayPlayBoard(self):
+        print(self.playBoard)
+
+    def displayStatusBoard(self):
+        print(self.statusBoard)
+
     def checkPlayBoard(self, number):
         '''checks where is the number coordinate'''
-        elem = [elem for elem in self.gridBoard if int(number) in elem][0]
-        print('The index is (%d, %d)' %(self.gridBoard.index(elem), elem.index(number)))
-        self.statusBoard[self.gridBoard.index(elem)][elem.index(number)] = CHECKED_GRID
-        print('Successfully crossed out ' + str(number) + '!')
+        elem = [elem for elem in self.playBoard if int(number) in elem][0]
+        self.statusBoard[self.playBoard.index(elem)][elem.index(number)] = CHECKED_GRID
+        print('Successfully crossed out ' + str(number) + ' on ' + self.name + ' board!')
         return True
 
     def checkStatusBoard(self):
+        
+        totalMatchingPattern = 0
+        
         '''checks if horizontal pattern has been fulfilled'''
-        crossedOut_horizontal = [0] * GRID_SIZE
-        for row in self.statusBoard:
-            if row.count(0) == 0:
-                crossedOut_horizontal[row] = 1
+        matchingPattern = 0
+        for rowList in self.statusBoard:
+            if rowList.count(0) == 0:
+                matchingPattern += 1
 
-##            if crossedOut_horizontal[row] == 1:
-##                bingoCount+=1
-##                crossedOut_horizontal[row] = 2
-##            else:
-##                #remain unchanged
+        if matchingPattern > self.countHorizontalMatch:
+            self.countHorizontalMatch = matchingPattern
+##            print('Horizontal count = ' + str(self.countHorizontalMatch))
 
-##        '''checks if vertical pattern has been fulfilled'''
-##        crossedOut_vertical = [0] * GRID_SIZE
-##        for row in GRID_SIZE:
-##            list_ver = []
-##            for col in GRID_SIZE:
-##                list_ver.append(vert[col][row])
-##
-##            if list_ver.count(0) == 0:
-##                crossedOut_hor[row] = 1
-##
-##            if crossedOut_hor[row] = 1
-##                bingoCount+=1
-##                crossedOut_hor[row] = 2
-##            else:
-##                #remain unchanged
+        '''checks if vertical pattern has been fulfilled'''
+        matchingPattern = 0
+        crossedOut_vertical = [0] * GRID_SIZE
+        for row in range(GRID_SIZE):
+            list_ver = []
+            for col in range(GRID_SIZE):
+                list_ver.append(self.statusBoard[col][row])
+
+            if list_ver.count(0) == 0:
+                matchingPattern += 1
+
+            if matchingPattern > self.countVerticalMatch:
+                self.countVerticalMatch = matchingPattern
+##                print('Vertical count = ' + str(self.countVerticalMatch))
+
+        '''checks if diagonal pattern has been fulfilled'''
+        crossedOut_diagonal = [0] * GRID_SIZE
+        matchingPattern = 0
+        list_diagLeft = []
+        list_diagRight = []
+        for row in range(GRID_SIZE):
+            list_diagLeft.append(self.statusBoard[row][row])
+            list_diagRight.append(self.statusBoard[row][(GRID_SIZE-1)-row])
+
+        if list_diagLeft.count(0) == 0:
+            matchingPattern += 1
+
+        if list_diagRight.count(0) == 0:
+            matchingPattern += 1
+            
+
+        if matchingPattern > self.countDiagonalMatch:
+            self.countDiagonalMatch = matchingPattern
+##            print('Diagonal count = ' + str(self.countDiagonalMatch))
+        
+        totalMatchingPattern = self.countHorizontalMatch + self.countVerticalMatch + self.countDiagonalMatch
+        print(self.name + ' Number of matching pattern : ' + str(totalMatchingPattern))
+        if totalMatchingPattern >= 5:
+            print(self.name + ' calls Bingo!')
+            return False
+        return True
 
 class Utilities:
     '''Convert a list to 2d array'''
@@ -105,43 +144,60 @@ uncalledNum = list(range(BINGO_START_NUM, BINGO_END_NUM+1))
 
 #Create player
 player = Players()
-player.createPlayer()
+player.createPlayer("WS")
+player.displayPlayBoard()
 
 #Create computer opponent
 comp = Players()
-comp.createPlayer()
+comp.createPlayer("COMP")
 
 #Start the game to call numbers
+# 1. Randomly select who to start first. Odd num - Player, Even num - Comp
+seed = random.choice(range(8))
+
+# 2. Turn on the game switch
 isGameOn = True
-
 while isGameOn:
-    
-    isNotValidRound = True
-    #Call a number and checks for validity
-    while isNotValidRound:
-        numCalled = int(input('Player call a number ranging between 1-25\n'))
-        
-        if numCalled > 0 and numCalled < 25 and numCalled in uncalledNum:
-            player.checkPlayBoard(numCalled)
-            comp.checkPlayBoard(numCalled)
-            uncalledNum.remove(numCalled)
-            isNotValidRound = True
-            break;
-        else:
-            print('Invalid number. Please re-enter.')
 
-    #Check if you filled any pattern
-    player.checkStatusBoard()
-    comp.checkStatusBoard()
+    if seed%2 != 0:
+        isNotValidRound = True
+        #Call a number and checks for validity
+        while isNotValidRound:
+            numCalled = int(input('\nPlayer choose a number between 1-25\n'))
+            print('Player called : ' + str(numCalled))
+            if numCalled > 0 and numCalled <=25  and numCalled in uncalledNum:
+                player.checkPlayBoard(numCalled)
+                comp.checkPlayBoard(numCalled)
+                uncalledNum.remove(numCalled)
+                isNotValidRound = True
+                break;
+            else:
+                print('\nInvalid number. Please re-enter.')
 
-    #Computer calls a number
-    print('Comp call a number ranging between 1-25')
-    comp.checkPlayBoard(4)
-    player.checkPlayBoard(4)
+        #Check if you filled any pattern
+        isGameOn = player.checkStatusBoard() and comp.checkStatusBoard()
+        print('\nPlayer status board: ')
+        player.displayStatusBoard()
+        print('\nPlayer play board: ')
+        player.displayPlayBoard()
+        seed += 1
 
-    #Check if fulfill any pattern
-    player.checkStatusBoard()
-    comp.checkStatusBoard()
+    else:
+        #Computer calls a number
+        print('\nCOMP\'s turn : ')
+        numCalled = random.choice(uncalledNum)
+        print('COMP called : ' + str(numCalled))
+        comp.checkPlayBoard(numCalled)
+        player.checkPlayBoard(numCalled)
+        uncalledNum.remove(numCalled)
+
+        #Check if you filled any pattern
+        isGameOn = player.checkStatusBoard() and comp.checkStatusBoard()
+        print('\nPlayer status board: ')
+        player.displayStatusBoard()
+        seed += 1
+
+print('Game ended')
 
 
 
