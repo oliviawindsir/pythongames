@@ -17,7 +17,7 @@ Winning criteria:
 
 
 
-## Game #2 - Bingo - IN PROGRESS
+## Game #2 - Bingo - RELEASED
 -----------------------------
 How to play:
 At start of the game, two random grids of 5x5 filled from 1-25 (non-repeated) - one for player and another for computer.
