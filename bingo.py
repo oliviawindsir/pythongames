@@ -30,20 +30,17 @@ class Grid:
         self.gridSize = GRID_SIZE
         self.minVal = BINGO_START_NUM
         self.maxVal = BINGO_END_NUM
-##        print('Initialized grid properties')
 
     '''Create grid with randomly allocated num within range'''
     def createStatusBoard(self):
         grid = []
         grid = [[0] * GRID_SIZE for n in range(GRID_SIZE)]
-##        print('Created status grid of size ' + str(self.gridSize) + 'X' + str(self.gridSize))
         return grid
 
     def createPlayBoard(self):
         num_list = list(range(self.minVal,self.maxVal+1))
         shuffle(num_list)
         grid = Utilities.to_matrix(num_list,GRID_SIZE)
-####        print('Created play grid of size ' + str(self.gridSize) + 'X' + str(self.gridSize))
         return grid
 
 class Players(Grid):    
@@ -75,10 +72,7 @@ class Players(Grid):
         print('Successfully crossed out ' + str(number) + ' on ' + self.name + ' board!')
         return True
 
-    def checkStatusBoard(self):
-        
-        totalMatchingPattern = 0
-        
+    def checkHorizontalPattern(self):
         '''checks if horizontal pattern has been fulfilled'''
         matchingPattern = 0
         for rowList in self.statusBoard:
@@ -87,8 +81,8 @@ class Players(Grid):
 
         if matchingPattern > self.countHorizontalMatch:
             self.countHorizontalMatch = matchingPattern
-##            print('Horizontal count = ' + str(self.countHorizontalMatch))
 
+    def checkVerticalPattern(self):
         '''checks if vertical pattern has been fulfilled'''
         matchingPattern = 0
         crossedOut_vertical = [0] * GRID_SIZE
@@ -102,8 +96,8 @@ class Players(Grid):
 
             if matchingPattern > self.countVerticalMatch:
                 self.countVerticalMatch = matchingPattern
-##                print('Vertical count = ' + str(self.countVerticalMatch))
 
+    def checkDiagonalPattern(self):
         '''checks if diagonal pattern has been fulfilled'''
         crossedOut_diagonal = [0] * GRID_SIZE
         matchingPattern = 0
@@ -122,7 +116,13 @@ class Players(Grid):
 
         if matchingPattern > self.countDiagonalMatch:
             self.countDiagonalMatch = matchingPattern
-##            print('Diagonal count = ' + str(self.countDiagonalMatch))
+
+    def checkStatusBoard(self):
+        
+        totalMatchingPattern = 0
+        self.checkHorizontalPattern()
+        self.checkVerticalPattern()
+        self.checkDiagonalPattern()
         
         totalMatchingPattern = self.countHorizontalMatch + self.countVerticalMatch + self.countDiagonalMatch
         print(self.name + ' Number of matching pattern : ' + str(totalMatchingPattern))
@@ -131,6 +131,7 @@ class Players(Grid):
             return False
         return True
 
+    
 class Utilities:
     '''Convert a list to 2d array'''
     def to_matrix(l, n):
